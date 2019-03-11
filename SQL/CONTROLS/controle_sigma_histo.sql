@@ -1,13 +1,22 @@
 SET SERVEROUTPUT ON;
 declare
     v_nb_cde VARCHAR2(10);
-
+    v_nb_fourn_cde VARCHAR2(10);
+    v_nb_ligne_cde VARCHAR2(5);
+    v_nb_mt_total VARCHAR2(11);
 BEGIN
-/* controles produits*/
-select count(distinct code_nomenclature) into v_nb_cde from TMP_IMP_PRODUIT;
+/* controles en-tête commandes*/
+select count(distinct nocdefou) into v_nb_cde from tmp_imp_entete_cde;
+select count(distinct cdfo) into v_nb_fourn_cde from TMP_IMP_ENTETE_CDE;
+/* controles détails commandes*/
+select count(*) into v_nb_ligne_cde from TMP_IMP_LIGNE_CDE d 
+inner join TMP_IMP_ENTETE_CDE e on d.nocdefou = e.nocdefou;
+select to_char(sum(pa_ht_apres_remises+mttva),'999G999D99') into v_nb_mt_total from TMP_IMP_LIGNE_CDE d
+inner join TMP_IMP_ENTETE_CDE e on d.nocdefou = e.nocdefou;
 
-/* TABLEAU PRODUITS */
-dbms_output.put_line('<h3 style="color:DarkRed;">Les Produits</h3>
+
+/* TABLEAU COMMANDES */
+dbms_output.put_line('<h3 style="color:DarkRed;">Les En-têtes Commandes</h3>
 <table class="table">
     <thead class="thead-dark">
         <tr>
@@ -16,31 +25,19 @@ dbms_output.put_line('<h3 style="color:DarkRed;">Les Produits</h3>
     </thead>
     <tbody>
     <tr>');
-dbms_output.put_line('<td><strong>Nomenclature RFSF</strong></td><td style="text-align:right;">'||v_nb_rfsf||'</td>');
-dbms_output.put_line('</tr><br><tr>');
-dbms_output.put_line('<td><strong>Codes à barres</strong></td><td style="text-align:right;">'||v_nb_ean||'</td>');
-dbms_output.put_line('</tr><br><tr>');
-dbms_output.put_line('<td><strong>Produits nationaux</strong></td><td style="text-align:right;">'||v_nb_produits_nationaux||'</td>');
-dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td><strong>Produits locaux</strong></td><td style="text-align:right;">'||v_nb_produits_locaux||'</td>');
-dbms_output.put_line('</tr><tr class="table-success">');
-dbms_output.put_line('<td><strong>Total Produits</strong></td><td style="text-align:right;"><strong>'||v_nb_produits||'</strong></td>');
-dbms_output.put_line('</tr><br>');
-dbms_output.put_line('<tr class="table-secondary"><td colspan="2"><strong>Typologie articles</strong></td></tr>');
-FOR res IN (select type_pdt, CASE WHEN type_pdt='N' THEN 'Normal' WHEN type_pdt='S' THEN 'Service' ELSE 'Normal' END as lib_type, count(distinct code_anpf) as nb from TMP_IMP_PRODUIT group by type_pdt order by type_pdt) 
+dbms_output.put_line('<td><strong>Nombre de commandes</strong></td><td style="text-align:right;">'||v_nb_cde||'</td>');
+dbms_output.put_line('</tr>');
+dbms_output.put_line('<tr class="table-secondary"><td colspan="2"><strong>Statut commande</strong></td></tr>');
+FOR res IN (select statut, CASE WHEN statut='2' THEN 'Situation n°40' WHEN statut='4' THEN 'Situation n°70' ELSE 'METI - ??' END as lib_statut, count(*) as nb from tmp_imp_entete_cde group by statut order by statut) 
 LOOP  
-    dbms_output.put_line('<tr><td><strong>'||res.type_pdt||' ('||res.lib_type||')</strong></td><td style="text-align:right;">'||res.nb||'</td></tr>');
+    dbms_output.put_line('<tr><td><strong>'||res.statut||' ('||res.lib_statut||')</strong></td><td style="text-align:right;">'||res.nb||'</td></tr>');
 END LOOP;
-dbms_output.put_line('<tr class="table-secondary"><td colspan="2"><strong>Unité mesure articles</strong></td></tr><tr>');
-FOR res IN (select unite_mesure, CASE WHEN unite_mesure='05 ' THEN 'M²' ELSE unite_mesure END as lib_unite, count(distinct code_anpf) as nb from TMP_IMP_PRODUIT group by unite_mesure order by unite_mesure) 
-LOOP  
-    dbms_output.put_line('<tr><td><strong>'||res.unite_mesure||' ('||res.lib_unite||')</strong></td><td style="text-align:right;">'||res.nb||'</td></tr>');
-END LOOP;
-dbms_output.put_line('<tr class="table-secondary"><td><strong>Unités dérivées</strong></td><td style="text-align:right;">'||v_nb_unites_derivees||'</td></tr>');
+dbms_output.put_line('<tr>');
+dbms_output.put_line('<td><strong>Nombre de fournisseurs ayant livré de la mrch</strong></td><td style="text-align:right;">'||v_nb_fourn_cde||'</td>');
+dbms_output.put_line('</tr>');
+dbms_output.put_line('</tbody>');
 dbms_output.put_line('</table>');
-
-/* TABLEAU FOURNISSEURS */
-dbms_output.put_line('<hr><h3 style="color:DarkRed;">Les Fournisseurs</h3>');
+dbms_output.put_line('<hr><h3 style="color:DarkRed;">Les Lignes Commandes</h3>');
 dbms_output.put_line('
 <table class="table">
     <thead class="thead-dark">
@@ -50,74 +47,119 @@ dbms_output.put_line('
     </thead>
     <tbody>
         <tr>');
-dbms_output.put_line('<td><strong>Fournisseurs nationaux</strong></td><td style="text-align:right;">'||v_nb_fournisseurs_nationaux||'</td>');
+dbms_output.put_line('<td><strong>Nombre de lignes de détails commandes</strong></td><td style="text-align:right;">'||v_nb_ligne_cde||'</td>');
 dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td><strong>Fournisseurs locaux</strong></td><td style="text-align:right;">'||v_nb_fournisseurs_locaux||'</td>');
-dbms_output.put_line('</tr><tr  class="table-success">');
-dbms_output.put_line('<td><strong>Total Fournisseurs</strong></td><td style="text-align:right;"><strong>'||v_nb_fournisseurs||'</strong></td>');
-dbms_output.put_line('</tr></tbody></table>');
-
-dbms_output.put_line('<hr>');
-
-/* TABLEAU COMPARATIF AVEC REFERENTIEL CENTRALISE */
-dbms_output.put_line('<h3 style="color:DarkRed;">Analyse du référentiel produit</h3>');
-
-dbms_output.put_line('<table class="table">
-<thead class="thead-dark">
+dbms_output.put_line('<td><strong>Montant total commandé</strong></td><td style="text-align:right;">'||v_nb_mt_total||' €</td>');
+dbms_output.put_line('</tr>');
+dbms_output.put_line('</tbody>');
+dbms_output.put_line('</table>');
+dbms_output.put_line('<hr><h3 style="color:DarkRed;">Les Achats</h3>');
+dbms_output.put_line('
+<table class="table">
+    <thead class="thead-dark">
         <tr>
-            <th colspan="3" scope="col">Données identifiées et enrichies</th>
+            <th colspan="2" scope="col">Données brutes SIGMA</th>
         </tr>
     </thead>
     <tbody>
-    <tr class="table-secondary">');
-dbms_output.put_line('<td colspan="2"><strong>CAS #1 : Articles nationaux et locaux connus en Centrale (critère "ANPF+EAN")</strong></td><td style="text-align:right;"><strong>'||v_nb_communs_anpf_ean||'</strong></td>');
-dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td></td><td style="text-align:right;">nationaux </td><td style="text-align:right;">'||v_nb_communs_anpf_ean_nat||'</td>');
-dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td></td><td style="text-align:right;">locaux </td><td style="text-align:right;">'||v_nb_communs_anpf_ean_loc||'</td>');
-dbms_output.put_line('</tr><tr class="table-secondary">');
-dbms_output.put_line('<td colspan="2"><strong>CAS #2 : Articles nationaux connus en Centrale (critère "ANPF uniquement")</strong></td><td style="text-align:right;"><strong>'||v_nb_communs_anpf||'</strong></td>');
-dbms_output.put_line('</tr><tr class="table-secondary">');
-dbms_output.put_line('<td colspan="2"><strong>CAS #3 : Articles nationaux et locaux connus en Centrale (crtière "EAN uniquement") (nouvel ANPF)</strong></td><td style="text-align:right;"><strong>'||v_nb_communs_ean||'</strong></td>');
-dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td></td><td style="text-align:right;">nationaux </td><td style="text-align:right;">'||v_nb_communs_ean_nat||'</td>');
-dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td></td><td style="text-align:right;">locaux </td><td style="text-align:right;">'||v_nb_communs_ean_loc||'</td>');
-dbms_output.put_line('</tr><tr class="table-secondary">');
-dbms_output.put_line('<td colspan="2"><strong>CAS #4 : Articles nationaux inconnus</strong></td><td style="text-align:right;"><strong>'||v_nb_inconnus||'</strong></td>');
-dbms_output.put_line('</tr><tr class="table-secondary">');
-dbms_output.put_line('<td colspan="2"><strong>CAS #5 : Articles locaux inconnus</strong></td><td style="text-align:right;"><strong>'||v_nb_inconnus_locaux||'</strong></td>');
-dbms_output.put_line('</tr><tr class="table-warning">');
-dbms_output.put_line('<td colspan="2"><strong>Total articles analysés</strong></td><td style="text-align:right;"><strong style="text-decoration:underline;">'||(v_nb_communs_anpf_ean+v_nb_communs_anpf+v_nb_communs_ean+v_nb_inconnus+v_nb_inconnus_locaux)||'</strong></td>');
-dbms_output.put_line('</tr><tr class="table-success">');
-dbms_output.put_line('<td colspan="2"><strong>Ecart entre SIGMA et Analyse METI</strong></td><td style="text-align:right;"><strong style="text-decoration:underline;">'||(v_nb_produits-(v_nb_communs_anpf_ean+v_nb_communs_anpf+v_nb_communs_ean+v_nb_inconnus+v_nb_inconnus_locaux))||'</strong></td>');
-dbms_output.put_line('</tr></table>');
-dbms_output.put_line('<hr>');
-
-dbms_output.put_line('<h3 style="color:DarkRed;">Intégration flux RAR</h3>');
-
-dbms_output.put_line('<p><strong>'||v_nb_attention||' articles ne peuvent être intégrés</strong></p><p><a href="#" onclick="return show();">Afficher</a></p>');
-dbms_output.put_line('<div id="attention" style="display:none;">');
-dbms_output.put_line('<p><a href="#" onclick="return hide();">Cacher</a></p>');
-dbms_output.put_line('<table><tr><th>N° ligne</th><th>ANPF</th><th>Commentaire</th></tr>');
-DECLARE
-v_noligne       tmp_imp_produit.noligne%TYPE;   
-v_code_anpf     tmp_imp_produit.noligne%TYPE;
-v_commentaire   tmp_imp_produit.commentaire%TYPE;
-CURSOR c_attention IS
-SELECT noligne, code_anpf, commentaire FROM tmp_imp_produit WHERE commentaire IS NOT NULL ORDER BY noligne;
-BEGIN
-    OPEN c_attention;
-    LOOP
-    FETCH c_attention INTO v_noligne, v_code_anpf, v_commentaire;
-        dbms_output.put_line('<tr><td>'||v_noligne||'</td><td>'||v_code_anpf||'</td><td>'||v_commentaire||'</td></tr>');
-    EXIT WHEN c_attention%NOTFOUND;
-    END LOOP;
-    CLOSE c_attention;
-END;
-dbms_output.put_line('</table></div>');
-
-
+    <tr class="table-secondary">
+            <td scope="col">YYYY/MM</td>
+            <td scope="col" style="text-align:right;">Montant achat</td>
+        </tr>');
+    DECLARE
+    v_date_mois     varchar2(2);
+    v_date_annee    varchar2(2); 
+    v_montant_mois  varchar2(20);
+    CURSOR c_ca IS
+    select substr(date_achat,9,2), substr(date_achat,4,2), to_char(sum(valeur_achat*qt_achete),'999G999G999D99') from TMP_HISTO_ACHAT
+    group by substr(date_achat,9,2), substr(date_achat,4,2)
+    order by substr(date_achat,9,2), substr(date_achat,4,2);
+    BEGIN
+        OPEN c_ca;
+        LOOP
+        FETCH c_ca INTO v_date_annee, v_date_mois, v_montant_mois;
+        EXIT WHEN c_ca%NOTFOUND;
+            dbms_output.put_line('<tr><td>20'||v_date_annee||'/'||v_date_mois||'</td><td style="text-align:right;">'||v_montant_mois||' €</td></tr>');
+        END LOOP;
+        CLOSE c_ca;
+    END;
+dbms_output.put_line('</tbody>');
+dbms_output.put_line('</table>');
+dbms_output.put_line('<hr><h3 style="color:DarkRed;">Les Ventes</h3>');
+dbms_output.put_line('
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th colspan="2" scope="col">Données brutes SIGMA</th>
+            <th colspan="1" scope="col" style="text-align:right;">Données METI</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr class="table-secondary">
+            <td scope="col">YYYY/MM</td>
+            <td scope="col" style="text-align:right;">Montant Vente (CA HT + Mt TVA)</td>
+            <td scope="col" style="text-align:right;">Montant Vente</td>
+        </tr>');
+    DECLARE
+    v_date_mois     varchar2(2);
+    v_date_annee    varchar2(2); 
+    v_montant_mois  varchar2(20);
+    v_montant_mois_meti varchar2(20);
+    CURSOR c_ca IS
+    select substr(dtrem,9,2), substr(dtrem,4,2), to_char(sum(mtvente),'999G999D99') from TMP_HISTO_VENTE
+    group by substr(dtrem,9,2), substr(dtrem,4,2)
+    order by substr(dtrem,9,2), substr(dtrem,4,2);
+    BEGIN
+        OPEN c_ca;
+        LOOP
+        FETCH c_ca INTO v_date_annee, v_date_mois, v_montant_mois;
+        EXIT WHEN c_ca%NOTFOUND;
+            select  to_char(sum(vam_mtvente),'999G999G999D99') into v_montant_mois_meti from MGVAMS where vam_aavt=to_number(concat('20',v_date_annee)) and vam_mmvt=to_number(v_date_mois);
+            dbms_output.put_line('<tr><td>20'||v_date_annee||'/'||v_date_mois||'</td><td style="text-align:right;">'||v_montant_mois||' €</td><td style="text-align:right;">'||v_montant_mois_meti||' €</td></tr>');
+        END LOOP;
+        CLOSE c_ca;
+    END;
+dbms_output.put_line('</tbody>');
+dbms_output.put_line('</table>');
+dbms_output.put_line('<hr><h3 style="color:DarkRed;">Les Stocks</h3>');
+dbms_output.put_line('
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th colspan="2" scope="col">Données brutes SIGMA</th>
+            <th colspan="1" scope="col">Données METI</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr class="table-secondary">
+            <td scope="col">Article (au hasard)</td>
+            <td scope="col" style="text-align:right;">Stock à date de bascule</td>
+            <td scope="col" style="text-align:right;">Stock</td>
+        </tr>');
+    DECLARE
+    v_nart     varchar2(8);
+    v_quantite varchar2(5); 
+    v_stock_meti NUMBER(10,3);
+    CURSOR c_stock IS
+    SELECT nart, quantite
+    FROM   (
+        SELECT nart, quantite
+        FROM  TMP_IMP_STOCK
+        ORDER BY DBMS_RANDOM.VALUE)
+    WHERE  rownum <= 10 and quantite >0 and nart is not null
+    order by nart;
+    BEGIN
+        OPEN c_stock;
+        LOOP
+        FETCH c_stock INTO v_nart, v_quantite;
+        EXIT WHEN c_stock%NOTFOUND;
+            SELECT ast_qtstock into v_stock_meti from mgast where ast_noart = v_nart;
+            dbms_output.put_line('<tr><td>'||v_nart||'</td><td style="text-align:right;">'||v_quantite||'</td><td style="text-align:right;">'||v_stock_meti||'</td></tr>');
+        END LOOP;
+        CLOSE c_stock;
+    END;
+dbms_output.put_line('</tbody>');
+dbms_output.put_line('</table>');
 END;
 /
 quit

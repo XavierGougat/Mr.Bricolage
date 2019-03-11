@@ -1,18 +1,35 @@
 SET SERVEROUTPUT ON;
 declare
-    v_nb_cde VARCHAR2(10);
-    v_nb_fourn_cde VARCHAR2(10);
-    v_nb_ligne_cde VARCHAR2(5);
-    v_nb_mt_total VARCHAR2(11);
+    v_nb_cde      VARCHAR2(10);
+    v_nb_cde_meti VARCHAR2(10);
+
+    v_nb_fourn_cde      VARCHAR2(10);
+    v_nb_fourn_cde_meti VARCHAR2(10);
+
+    v_nb_ligne_cde      VARCHAR2(10);
+    v_nb_ligne_cde_meti VARCHAR2(10);
+
+    v_mt_total       VARCHAR2(20);
+    v_mt_total_meti  VARCHAR2(20);
+
+    v_nb_cde_statut_meti VARCHAR2(10);
 BEGIN
 /* controles en-tête commandes*/
 select count(distinct nocdefou) into v_nb_cde from tmp_imp_entete_cde;
+select count(distinct cdf_nocdefou) into v_nb_cde_meti from mgcdf;
+
 select count(distinct cdfo) into v_nb_fourn_cde from TMP_IMP_ENTETE_CDE;
+select count(distinct cdf_cdfo) into v_nb_fourn_cde_meti from mgcdf;
+
 /* controles détails commandes*/
 select count(*) into v_nb_ligne_cde from TMP_IMP_LIGNE_CDE d 
 inner join TMP_IMP_ENTETE_CDE e on d.nocdefou = e.nocdefou;
-select to_char(sum(pa_ht_apres_remises+mttva),'999G999D99') into v_nb_mt_total from TMP_IMP_LIGNE_CDE d
+select count(*) into v_nb_ligne_cde_meti from mgdcf
+inner join mgcdf e on dcf_nocdefou = cdf_nocdefou;
+
+select to_char(sum(pa_ht_apres_remises),'999G999D99') into v_mt_total from TMP_IMP_LIGNE_CDE d
 inner join TMP_IMP_ENTETE_CDE e on d.nocdefou = e.nocdefou;
+select to_char(sum(cdf_mtachat),'999G999G999D99') into v_mt_total_meti from mgcdf;
 
 
 /* TABLEAU COMMANDES */
@@ -21,19 +38,21 @@ dbms_output.put_line('<h3 style="color:DarkRed;">Les En-têtes Commandes</h3>
     <thead class="thead-dark">
         <tr>
             <th colspan="2" scope="col">Données brutes SIGMA</th>
+            <th colspan="1" scope="col" style="text-align:right;">Données METI</th>
         </tr>
     </thead>
     <tbody>
     <tr>');
-dbms_output.put_line('<td><strong>Nombre de commandes</strong></td><td style="text-align:right;">'||v_nb_cde||'</td>');
+dbms_output.put_line('<td><strong>Nombre de commandes</strong></td><td style="text-align:right;">'||v_nb_cde||'</td><td style="text-align:right;">'||v_nb_cde_meti||'</td>');
 dbms_output.put_line('</tr>');
-dbms_output.put_line('<tr class="table-secondary"><td colspan="2"><strong>Statut commande</strong></td></tr>');
-FOR res IN (select statut, CASE WHEN statut='2' THEN 'Situation n°40' WHEN statut='4' THEN 'Situation n°70' ELSE 'METI - ??' END as lib_statut, count(*) as nb from tmp_imp_entete_cde group by statut order by statut) 
+dbms_output.put_line('<tr class="table-secondary"><td colspan="3"><strong>Statut commande</strong></td></tr>');
+FOR res IN (select statut, CASE WHEN statut='2' THEN '40' WHEN statut='4' THEN '70' ELSE '99' END as lib_statut, count(*) as nb from tmp_imp_entete_cde group by statut order by statut) 
 LOOP  
-    dbms_output.put_line('<tr><td><strong>'||res.statut||' ('||res.lib_statut||')</strong></td><td style="text-align:right;">'||res.nb||'</td></tr>');
+    select count(*) into v_nb_cde_statut_meti from mgcdf where cdf_cdsitu = to_number(res.lib_statut);
+    dbms_output.put_line('<tr><td><strong>'||res.statut||' ('||res.lib_statut||')</strong></td><td style="text-align:right;">'||res.nb||'</td><td style="text-align:right;">'||v_nb_cde_statut_meti||'</td></tr>');
 END LOOP;
 dbms_output.put_line('<tr>');
-dbms_output.put_line('<td><strong>Nombre de fournisseurs ayant livré de la mrch</strong></td><td style="text-align:right;">'||v_nb_fourn_cde||'</td>');
+dbms_output.put_line('<td><strong>Nombre de fournisseurs ayant livré de la mrch</strong></td><td style="text-align:right;">'||v_nb_fourn_cde||'</td><td style="text-align:right;">'||v_nb_fourn_cde_meti||'</td>');
 dbms_output.put_line('</tr>');
 dbms_output.put_line('</tbody>');
 dbms_output.put_line('</table>');
@@ -43,13 +62,14 @@ dbms_output.put_line('
     <thead class="thead-dark">
         <tr>
             <th colspan="2" scope="col">Données brutes SIGMA</th>
+            <th colspan="1" scope="col" style="text-align:right;">Données METI</th>
         </tr>
     </thead>
     <tbody>
         <tr>');
-dbms_output.put_line('<td><strong>Nombre de lignes de détails commandes</strong></td><td style="text-align:right;">'||v_nb_ligne_cde||'</td>');
+dbms_output.put_line('<td><strong>Nombre de lignes de détails commandes</strong></td><td style="text-align:right;">'||v_nb_ligne_cde||'</td><td style="text-align:right;">'||v_nb_ligne_cde_meti||'</td');
 dbms_output.put_line('</tr><tr>');
-dbms_output.put_line('<td><strong>Montant total commandé</strong></td><td style="text-align:right;">'||v_nb_mt_total||' €</td>');
+dbms_output.put_line('<td><strong>Montant total commandé</strong></td><td style="text-align:right;">'||v_mt_total||' €</td><td style="text-align:right;">'||v_mt_total_meti||' €</td');
 dbms_output.put_line('</tr>');
 dbms_output.put_line('</tbody>');
 dbms_output.put_line('</table>');
@@ -127,7 +147,7 @@ dbms_output.put_line('
     <thead class="thead-dark">
         <tr>
             <th colspan="2" scope="col">Données brutes SIGMA</th>
-            <th colspan="1" scope="col">Données METI</th>
+            <th colspan="1" scope="col" style="text-align:right;">Données METI</th>
         </tr>
     </thead>
     <tbody>

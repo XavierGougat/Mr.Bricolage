@@ -5,32 +5,29 @@ BEGIN
 
     /* 1) AFFECTATION DU CODE TVA*/
     dbms_output.put_line('Etape 1 : Mise a jour du code TVA');    
-	update TMP_IMP_PRODUIT set meti_cdtva = 1 where code_tva is null; 
-	update TMP_IMP_PRODUIT set meti_cdtva = 6 where code_tva = 'C';
-	update TMP_IMP_PRODUIT   
-	set meti_cdtva =
-	CASE
-		WHEN code_tva is null THEN 1
-		WHEN code_tva = 0 THEN 9
-		WHEN code_tva = 1 THEN 1
-		WHEN code_tva = 2 THEN 2
-		WHEN code_tva = 4 THEN 4
-	END
-	where code_tva is not null and code_tva <> 'C';	
-	commit;
-    /*------------------------------------------------------------------*/
-    /* 2) AFFECTATION DU TYPE ARTICLE */
-    dbms_output.put_line('Etape 2 : Affectation du type article');
+    update TMP_IMP_PRODUIT set meti_cdtva = 1 where code_tva is null; 
+    update TMP_IMP_PRODUIT set meti_cdtva = 6 where code_tva = 'C';
+    update TMP_IMP_PRODUIT   
+    set meti_cdtva =
+    CASE
+        WHEN code_tva is null THEN 1
+        WHEN code_tva = 0 THEN 9
+        WHEN code_tva = 1 THEN 1
+        WHEN code_tva = 2 THEN 2
+        WHEN code_tva = 4 THEN 4
+    END
+    where code_tva is not null and code_tva <> 'C';	
+    commit;
 
     /* 3) AFFECTATION DU TYUVEC, TYUNMESU, PDUNIT, MSCONTE*/
     dbms_output.put_line('Etape 3 : Mise a jour unite de mesure et de vente'); 
     -- unité de mesure et vente
     for c1 in (select vco_znvlrubo, vco_znvlrubd from MGVCO where vco_dslogori = 'C4950_REFE'and vco_cdrubori = 'U_MESURE' )
     loop
-	    update TMP_IMP_PRODUIT
-	    set meti_tyunmesu = meti_outil.strtoken(c1.vco_znvlrubd, ';', 1),
-	    meti_tyuvec = meti_outil.strtoken(c1.vco_znvlrubd, ';', 2)
-	    where trim(unite_mesure) = trim(c1.vco_znvlrubo);
+        update TMP_IMP_PRODUIT
+        set meti_tyunmesu = meti_outil.strtoken(c1.vco_znvlrubd, ';', 1),
+        meti_tyuvec = meti_outil.strtoken(c1.vco_znvlrubd, ';', 2)
+        where trim(unite_mesure) = trim(c1.vco_znvlrubo);
         commit;
     end loop;
     -- POIDS et CONTENANCE

@@ -10,8 +10,8 @@ DECLARE
     devise      mgsdv.sdv_cddevi%TYPE;
     tyuvec      mgart.art_tyuvec%TYPE;
     codefamille NUMBER;
-	fam_defaut NUMBER;
-	noartfam_defaut number;
+    fam_defaut NUMBER;
+    noartfam_defaut number;
     codearticle NUMBER;
     cdtva NUMBER;
     v_file       utl_file.file_type;
@@ -46,9 +46,9 @@ BEGIN
     COMMIT;
 
     date_prec := to_date('31/12/2999', 'DD/MM/YYYY');
-	fam_defaut := 988;
-	
-	-- récupération cd mag + code devise
+    fam_defaut := 988;
+
+    -- récupération cd mag + code devise
     SELECT a.cli_cdmag, sdv_cddevi
     INTO   vg_cdmag, devise
     FROM   mgmag a, mgsoc b, mgsdv, mgens
@@ -58,7 +58,7 @@ BEGIN
     AND    sdv_cdsoc = soc_cdsoc
     AND    soc_cdens = ens_cde;
 
-	-- récupération des intervalles par rapport aux dates fournies
+    -- récupération des intervalles par rapport aux dates fournies
     SELECT 
         MIN(dtrem),
         MAX(dtrem),
@@ -70,7 +70,7 @@ BEGIN
         to_char(MAX(dtrem), 'YYYYIW')
     INTO   datemin, datemax, anmin, anmax, moismin, moismax, semmin, semmax
     FROM   TMP_HISTO_VENTE; 
-	
+    
     /* On update ave les nouveaux codes articles issus de la caractéristique article ANPF */
     DECLARE
         v_crt       MGCRT%ROWTYPE;   
@@ -90,13 +90,13 @@ BEGIN
         CLOSE c_crt;
     END;
 
-	/* mise à jour de la famille article : temps de traitement 1 minute*/
+    /* mise à jour de la famille article : temps de traitement 1 minute*/
     update TMP_HISTO_VENTE
-	set meti_famille = (select art_cdf from mgart where art_noart = noart);
-	commit;
+    set meti_famille = (select art_cdf from mgart where art_noart = noart);
+    commit;
 
-	select fam_noartfam into noartfam_defaut from mgfam where fam_cdf = fam_defaut;
-	
+    select fam_noartfam into noartfam_defaut from mgfam where fam_cdf = fam_defaut;
+
     dbms_output.put_line('REJETS_ARTICLES_INCONNUS_avec ventes seront affecté a l''article famille :');
     FOR curs IN (SELECT DISTINCT nvl(noart, 0) ligne
                 FROM   TMP_HISTO_VENTE a
@@ -124,11 +124,11 @@ BEGIN
         WHERE  nvl(noart, 0) = curs.noart;
     END LOOP;
     COMMIT;
-	-- mise à jour du champ mtventht
-	-- = mtvente - mttva, même si les montants sont négatifs ?
+    -- mise à jour du champ mtventht
+    -- = mtvente - mttva, même si les montants sont négatifs ?
     -- Temps de traitement : 1 minute
-	update TMP_HISTO_VENTE
-	set mtventht = mtvente - mttva;
+    update TMP_HISTO_VENTE
+    set mtventht = mtvente - mttva;
     /* *** *** *** *** *** *** */
     dbms_output.put_line('chargement des vajr');
     dbms_output.put_line(to_char(SYSDATE, 'DD/MM/YYYY HH24:MI:SS'));
@@ -177,9 +177,9 @@ BEGIN
             curs.txtva, --txtva
             curs.tva_cdtva, --cdtva
             curs.mtachat2 
-    from dual;
-    COMMIT;	
-	END LOOP;    
+        from dual;
+        COMMIT;	
+    END LOOP;    
     
     dbms_output.put_line('chargement des mgvasm');
     dbms_output.put_line(to_char(SYSDATE, 'DD/MM/YYYY HH24:MI:SS'));
@@ -195,24 +195,26 @@ BEGIN
         vas_tyuvec, 
         vas_mtventht
     )
-    SELECT vaj_noart, 
-			vaj_cdmag, 
-			to_number(to_char(vaj_dtrem, 'YYYY'), '9999') aaaa,
-			to_number(to_char(vaj_dtrem, 'IW'), '99') sem, 
-			SUM(vaj_qtvend) qtvend,
-			SUM(vaj_mtvente) mtvente, 
-			SUM(VAJ_MTACHRFA) mtachatrfa, 
-			vaj_tyuvec,
-			SUM(vaj_mtventht) mtventht
-	FROM   mgvajr
-	WHERE  to_char(vaj_dtrem, 'YYYYIW') BETWEEN semmin AND semmax
-	and    vaj_cdmag=vg_cdmag
-	GROUP  BY 
-			vaj_noart, 
-			vaj_cdmag, 
-			to_number(to_char(vaj_dtrem, 'YYYY'), '9999'),
-            to_number(to_char(vaj_dtrem, 'IW'), '99'), 
-			vaj_tyuvec;
+    SELECT 
+        vaj_noart, 
+        vaj_cdmag, 
+        to_number(to_char(vaj_dtrem, 'YYYY'), '9999') aaaa,
+        to_number(to_char(vaj_dtrem, 'IW'), '99') sem, 
+        SUM(vaj_qtvend) qtvend,
+        SUM(vaj_mtvente) mtvente, 
+        SUM(VAJ_MTACHRFA) mtachatrfa, 
+        vaj_tyuvec,
+        SUM(vaj_mtventht) mtventht
+    FROM   mgvajr
+    WHERE  
+        to_char(vaj_dtrem, 'YYYYIW') BETWEEN semmin AND semmax 
+        and vaj_cdmag=vg_cdmag
+    GROUP BY 
+        vaj_noart, 
+        vaj_cdmag, 
+        to_number(to_char(vaj_dtrem, 'YYYY'), '9999'),
+        to_number(to_char(vaj_dtrem, 'IW'), '99'), 
+        vaj_tyuvec;
     COMMIT;
 
 
@@ -488,7 +490,7 @@ BEGIN
         select vug_dtrem as DT, fam_cdr as RAY, sum(vug_mtchaf)as CA, sum(vug_nbclient) as CLIENT, sum(vug_qtvend) as QT from mgvug
         inner join mgfam on vug_cdf = fam_cdf
         group by vug_dtrem, fam_cdr
-        order by vug_dtrem, fam_cdr;
+        order by vug_dtrem, fam_cdr
     )           
     LOOP
         INSERT INTO mgvry(

@@ -40,7 +40,7 @@ begin
 	/* **** ******************************************* ***** */
 	dbms_output.put_line('Debut Alimentation TMP_RAR');  
 	/* **** ************************** ***** */
-    dbms_output.put_line('Debut Alimentation des articles cas n°1 dans TMP_RAR');
+	dbms_output.put_line('Debut Alimentation des articles cas n°1 dans TMP_RAR');
 	/* **** ************************** ***** */
 	insert into LUCON_CAS_N1(
 		code_mbcen
@@ -50,10 +50,10 @@ begin
 	FROM TMP_IMP_PRODUIT
 	where trim(commentaire) is null
 	and connu_mbcen = 1 and ajout_ean_centrale is null and new_anpf is null;
-    COMMIT;
+	COMMIT;
 
 	insert into TMP_RAR(
-        noligne,
+		noligne,
 		code_article,
 		carac04,
 		cd_reseau,
@@ -72,7 +72,7 @@ begin
 /* Cas n°2 : CONNU NATIONAL (ANPF uniquement) : connu_mbcen=1 ajout_ean_centrale = 1 --> ON AJOUTE EAN SECONDAIRE DANS LE TMP_RAR PUIS DESCENTE RER */
 /* aucune modification à l'insertion TMP_RAR */
 	insert into TMP_RAR (
-        noligne,
+		noligne,
 		code_article,
 		NB_EAN_SEC,
 		EAN_SEC_1,
@@ -95,17 +95,17 @@ begin
 	**********************
 	On met à jour l ean secondaire via les infos de la table de travail TMP_CODE_BARRE 
 	***********************  
-  	*/
-    dbms_output.put_line('Debut mise à jour EAN secondaire dans TMP_RAR pour les articles cas n2');
+	*/
+	dbms_output.put_line('Debut mise à jour EAN secondaire dans TMP_RAR pour les articles cas n2');
 	DECLARE
-    	v_code_anpf        tmp_code_barre.code_anpf%TYPE;   
-    	v_code_barre_1       tmp_code_barre.code_barre%TYPE;
+		v_code_anpf        tmp_code_barre.code_anpf%TYPE;   
+		v_code_barre_1       tmp_code_barre.code_barre%TYPE;
 		v_code_barre_2       tmp_code_barre.code_barre%TYPE;
 		v_code_barre_3       tmp_code_barre.code_barre%TYPE;
 		v_code_barre_4       tmp_code_barre.code_barre%TYPE;
 		v_code_barre_5       tmp_code_barre.code_barre%TYPE;
-        CURSOR c_ean IS
-        SELECT * 
+		CURSOR c_ean IS
+		SELECT * 
 		FROM (
 			select c.code_anpf, c.code_barre, row_number()  over  (partition by c.code_anpf ORDER BY c.code_barre) as ean
 			FROM tmp_code_barre c
@@ -118,36 +118,36 @@ begin
 			4 AS EAN_SEC_4, 
 			5 AS EAN_SEC_5)
 		);
-    BEGIN
-        OPEN c_ean;
-        LOOP
-        FETCH c_ean INTO v_code_anpf, v_code_barre_1, v_code_barre_2, v_code_barre_3, v_code_barre_4, v_code_barre_5;
-            UPDATE tmp_rar set ean_sec_1 = v_code_barre_1, ean_sec_2 = v_code_barre_2, ean_sec_3 = v_code_barre_3, ean_sec_4 = v_code_barre_4, ean_sec_5 = v_code_barre_5
-            where code_article = v_code_anpf and ean_sec_1 = 0 and carac04 = 'RDD_CAS|2';
-            COMMIT;
-        EXIT WHEN c_ean%NOTFOUND;
-        END LOOP;
-        CLOSE c_ean;
-    END;
+	BEGIN
+		OPEN c_ean;
+		LOOP
+		FETCH c_ean INTO v_code_anpf, v_code_barre_1, v_code_barre_2, v_code_barre_3, v_code_barre_4, v_code_barre_5;
+			UPDATE tmp_rar set ean_sec_1 = v_code_barre_1, ean_sec_2 = v_code_barre_2, ean_sec_3 = v_code_barre_3, ean_sec_4 = v_code_barre_4, ean_sec_5 = v_code_barre_5
+			where code_article = v_code_anpf and ean_sec_1 = 0 and carac04 = 'RDD_CAS|2';
+			COMMIT;
+		EXIT WHEN c_ean%NOTFOUND;
+		END LOOP;
+		CLOSE c_ean;
+	END;
 	/* **** ************************** ***** */
 	/* Alimentation de la table TMP_RAR sur la centrale MBCEN */
 	/* Cas n°3 : CONNU NATIONAL et LOCAL (EAN uniquement) : connu_mbcen=2  + new_anpf=art_noart MBCEN --> ON AFFECTE LA CORRESPONDANCE AVEC L'ANPF DE MBCEN  */
 	/* aucune modification à l'insertion TMP_RAR */
 	/* **** ************************** ***** */
-    dbms_output.put_line('Debut Alimentation des articles cas n°3 dans TMP_RAR');
+	dbms_output.put_line('Debut Alimentation des articles cas n°3 dans TMP_RAR');
 	/* **** ************************** ***** */
 	insert into LUCON_CAS_N3 (
-        code_mbcen,
+		code_mbcen,
 		code_lucon
-		)
+	)
 	select
 		new_anpf,  -- no article centrale
 		code_anpf -- no article dump
 	FROM TMP_IMP_PRODUIT
 	where trim(commentaire) is null and connu_mbcen = 2 and ajout_ean_centrale is null and new_anpf is not null;
-    COMMIT;
+	COMMIT;
 	insert into TMP_RAR (
-        noligne,
+		noligne,
 		code_article,
 		carac04,
 		cd_reseau,
@@ -535,7 +535,7 @@ begin
             FETCH c_four INTO i_four;                
             UPDATE TMP_RAR SET 
 			cdfo=CASE WHEN to_number(i_four.code_fournisseur)<90000 THEN i_four.code_fournisseur ELSE i_four.code_fournisseur+920000, 
-			novar=20, 
+			novar=2, 
 			pcb=to_number(i_four.colisage), 
 			rffou2=i_four.ref_fournisseur, 
 			arv_ppal=CASE WHEN trim(i_four.fourn_principal) = '1' THEN 'O' ELSE 'N' END, 
@@ -552,7 +552,7 @@ begin
         CLOSE c_four;
 	END;
 	
-	/* 5 minutes d'update pouyr 15000 articles*/
+	/* 5 minutes d'update pour 15000 articles*/
 	DECLARE
 		CURSOR c_four_cas5 IS
         	SELECT t.* FROM  tmp_produit_fournisseur t
@@ -607,11 +607,13 @@ begin
     BEGIN
         OPEN c_four;
         LOOP
-            FETCH c_four INTO i_four;                
+            FETCH c_four INTO i_four;   
+			/* ici on crée le père à l'identique du fils */             
             insert into tmp_rar
 				(select * from tmp_rar where code_article = i_four.code_anpf);
             COMMIT;
 			
+			/* on affecte un nouveau code article au père, qui commence par '6' sur 7digits */
 			UPDATE tmp_rar SET code_article=lpad(code_article,7,'6'), carac05='UD', carac06=i_four.code_anpf
 			WHERE code_article =i_four.code_anpf and rownum=1;
 			

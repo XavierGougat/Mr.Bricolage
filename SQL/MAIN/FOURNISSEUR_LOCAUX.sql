@@ -30,51 +30,51 @@ DECLARE
 	lvoi VARCHAR2(60);
 	cvoi VARCHAR2(60);
 CURSOR c_four IS
-    SELECT t.* FROM  TMP_IMP_FOURNISSEUR t
-    where code is not null and code > 90000;
-    i_four TMP_IMP_FOURNISSEUR%ROWTYPE;
+	SELECT t.* FROM  TMP_IMP_FOURNISSEUR t
+	where code is not null and code > 90000;
+	i_four TMP_IMP_FOURNISSEUR%ROWTYPE;
 BEGIN
-    OPEN c_four;
-    LOOP
-        FETCH c_four INTO i_four;
-        conv_adresse(i_four.adr1, i_four.adr2, i_four.adr3, lvoi, cvoi);
-        insert into MGFOU(
-            FOU_CDFO,
-            fou_nm,
-            fou_cdtypf,
-            FOU_NVOI,
-            FOU_BTQ,
-            FOU_TVOI,
-            FOU_LVOI,
-            FOU_CVOI,
-            FOU_CPOS2,
-            FOU_DIST,
-            FOU_CDPAYS,
-            FOU_TLPH,
-            FOU_FX,
-            FOU_EMAI,
-            fou_fltartrs
-        )values(
-            to_number(i_four.code)+920000, 
-            i_four.nom,
-            'P',
-            null,
-            null,
-            null,
-            lvoi,
-            cvoi,
-            i_four.cp,
-            i_four.ville,
-            i_four.pays,
-            i_four.tel,
-            i_four.fax,
-            i_four.mail,
-            '46'
-        );
-        commit;
-        EXIT WHEN c_four%NOTFOUND;
-    END LOOP;
-    CLOSE c_four;
+	OPEN c_four;
+	LOOP
+		FETCH c_four INTO i_four;
+		conv_adresse(i_four.adr1, i_four.adr2, i_four.adr3, lvoi, cvoi);
+		insert into MGFOU(
+			FOU_CDFO,
+			fou_nm,
+			fou_cdtypf,
+			FOU_NVOI,
+			FOU_BTQ,
+			FOU_TVOI,
+			FOU_LVOI,
+			FOU_CVOI,
+			FOU_CPOS2,
+			FOU_DIST,
+			FOU_CDPAYS,
+			FOU_TLPH,
+			FOU_FX,
+			FOU_EMAI,
+			fou_fltartrs
+		)values(
+			to_number(i_four.code)+920000, 
+			i_four.nom,
+			'P',
+			null,
+			null,
+			null,
+			lvoi,
+			cvoi,
+			i_four.cp,
+			i_four.ville,
+			i_four.pays,
+			i_four.tel,
+			i_four.fax,
+			i_four.mail,
+			'46'
+		);
+		commit;
+		EXIT WHEN c_four%NOTFOUND;
+	END LOOP;
+	CLOSE c_four;
 END;	   
 /* *** ************************ *** */
 /* Début intégration des MGCIF */

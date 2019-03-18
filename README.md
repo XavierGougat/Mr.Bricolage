@@ -5,6 +5,8 @@
 Scripts de reprise des données issues du système d'informations tiers "SIGMA", pour intégration dans le back-office METI.
 Les règles de gestion ainsi que les règles de validation et contrôles de volumétrie post-reprise sont abordés dans le document [Règles de validation](https://docs.google.com/document/d/107S8XQBlX7a58akmwZmzyQYD_aJ4a2b4M-r1LLTH3SE/edit?usp=sharing).
 
+L'arborescence présentée ci-dessus doit être conservée et déposée sur le serveur d'application de(s) machine(s) concernée(s), à l'emplacement que vous souhaitez.
+
 ## Les étapes de la reprise
 
 ### Le Référentiel

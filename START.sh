@@ -3,16 +3,18 @@
 
 SCRIPT_RDD_FOUR=FOURNISSEUR.sql
 
-SCRIPT_RDD_01=PRODUIT_01.sql
-SCRIPT_RDD_02=PRODUIT_02.sql
-SCRIPT_RDD_03=PRODUIT_03.sql
-SCRIPT_RDD_04=PRODUIT_04.sql
-SCRIPT_RDD_05=PRODUIT_05.sql
+SCRIPT_RDD_01=SQL/PRODUIT_01.sql
+SCRIPT_RDD_02=SQL/PRODUIT_02.sql
+SCRIPT_RDD_03=SQL/PRODUIT_03.sql
+SCRIPT_RDD_04=SQL/PRODUIT_04.sql
+SCRIPT_RDD_05=SQL/PRODUIT_05.sql
 
 FILE_LOG=rdd_produit.log
 
-cd /meti/dfex/job/RDD/
-
+if [ ! -d "/DATA" ];then
+    echo "Le dossier DATA est absent";
+    exit 2
+fi
 echo "Debut RDD Fournisseur : `date`"
 echo "Debut RDD Fournisseur : `date`" > $FILE_LOG
 sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_FOUR >> $FILE_LOG

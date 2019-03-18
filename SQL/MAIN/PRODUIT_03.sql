@@ -4,7 +4,10 @@ BEGIN
     /* ICI ON AFFECTE LES CARACTERISTIQUES ARTICLES LIES A DE LA CODIFICATION SIGMA/METI */
 
     /* 1) AFFECTATION DU CODE TVA*/
-    dbms_output.put_line('Etape 1 : Mise a jour du code TVA');    
+    dbms_output.put_line('Etape 1 : Mise a jour du code TVA');   
+
+    select 
+
     update TMP_IMP_PRODUIT set meti_cdtva = 1 where code_tva is null; 
     update TMP_IMP_PRODUIT set meti_cdtva = 6 where code_tva = 'C';
     update TMP_IMP_PRODUIT   
@@ -15,8 +18,7 @@ BEGIN
         WHEN code_tva = 1 THEN 1
         WHEN code_tva = 2 THEN 2
         WHEN code_tva = 4 THEN 4
-    END
-    where code_tva is not null and code_tva <> 'C';	
+    END;	
     commit;
 
     /* 3) AFFECTATION DU TYUVEC, TYUNMESU, PDUNIT, MSCONTE*/

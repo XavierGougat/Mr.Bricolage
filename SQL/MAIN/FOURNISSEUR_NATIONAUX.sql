@@ -67,6 +67,10 @@ declare
 	lvoi VARCHAR2(60);
 	cvoi VARCHAR2(60);
 	v_d number(5) :=0 ; 
+	
+	v_grv number(2):=null;
+	v_arv number(2):=null;
+
 	v_er_MGFOU_FOU_CDFO  VARCHAR2(200);
 	v_er_MGFOU_INIT_CDFO VARCHAR2(200);
 	v_er_gene  VARCHAR2(200);

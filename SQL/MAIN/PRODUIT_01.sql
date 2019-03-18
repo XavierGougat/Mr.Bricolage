@@ -2,7 +2,7 @@ set serveroutput on
 DECLARE
 BEGIN
 /* 1) CONTROLE INTEGRITE DES DONNEES */
-UPDATE TIMP_IMP_PRODUIT set commentaire = null;
+UPDATE TMP_IMP_PRODUIT set commentaire = null;
 commit;
 
 -- articles en double

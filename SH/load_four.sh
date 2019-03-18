@@ -1,0 +1,1 @@
+sqlldr MBCEN/ATTENT1@PMBRICQ1 data=DATA/IMP_FOURNISSEUR.txt control=CTL/FOUR.CTL log=LOG/FOUR_LOAD.log bad=LOG/FOUR_LOAD_badfile.csv

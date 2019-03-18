@@ -7,10 +7,10 @@ trailing nullcols
 (noligne   RECNUM,
 code_fournisseur  ,
 code_anpf  ,
-colisage  "replace(TRIM(:colisage),'.',',')",
+colisage  "replace(TRIM(:colisage),',','.')",
 ref_fournisseur  ,
 fourn_principal  ,
-pab_ht  "replace(TRIM(:pab_ht),'.',',')",
+pab_ht  "replace(TRIM(:pab_ht),',','.')",
 groupe_remise  ,
 date_de_referencement  ,
 date_de_dereferencement  ,
@@ -20,5 +20,5 @@ minimum_commande  ,
 operande_de_conversion  ,
 code_magasin  ,
 unite_achat  ,
-pan_ht   "replace(TRIM(:pan_ht),'.',',')"
+pan_ht   "replace(TRIM(:pan_ht),',','.')"
  )

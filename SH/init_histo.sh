@@ -4,7 +4,7 @@
 FILE_LOG='../LOG/INIT_HISTO.log'
 
 echo "Creation des tables temporaires des historiques : `date`" > $FILE_LOG
-sqlplus -S -L MB001/$PWD_USER@$ORACLE_SERVICE @../SQL/INIT/init_histo.sql >> $FILE_LOG
+sqlplus -S -L MB002/$PWD_USER@$ORACLE_SERVICE @../SQL/INIT/init_histo.sql >> $FILE_LOG
 
 echo "Alimentation des tables temporaires avec les donnees du dump : `date`" >> $FILE_LOG
 

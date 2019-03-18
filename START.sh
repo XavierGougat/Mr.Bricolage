@@ -1,46 +1,61 @@
 #!/bin/sh
 . /home/metiadm/cron_setenv.sh
 
-SCRIPT_RDD_FOUR=FOURNISSEUR.sql
-
-SCRIPT_RDD_01=SQL/PRODUIT_01.sql
-SCRIPT_RDD_02=SQL/PRODUIT_02.sql
-SCRIPT_RDD_03=SQL/PRODUIT_03.sql
-SCRIPT_RDD_04=SQL/PRODUIT_04.sql
-SCRIPT_RDD_05=SQL/PRODUIT_05.sql
-
 FILE_LOG=rdd_produit.log
 
-if [ ! -d "/DATA" ];then
+if [ ! -d "./DATA" ];then
     echo "Le dossier DATA est absent";
     exit 2
 fi
-echo "Debut RDD Fournisseur : `date`"
-echo "Debut RDD Fournisseur : `date`" > $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_FOUR >> $FILE_LOG
 
-echo "Debut RDD Produit : `date`"
-echo "Debut RDD Produit : `date`" > $FILE_LOG
-echo "1- Controle et MaJ integrite des donnees"
-echo "1- Controle et MaJ integrite des donnees" >> $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_01 >> $FILE_LOG
 
-echo "2- Affectation de la nomenclature METI"
-echo "2- Affectation de la nomenclature METI" >> $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_02 >> $FILE_LOG
+cd SQL/INIT/
+echo "========================================================================"
+echo "| Initialisation tables temporaires : `date` |"
+echo "========================================================================"
+echo "- Creation des tables temporaires de referentiel : `date`"
+sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @init_ref.sql
 
-echo "3- Mise à jour vers codification METI"
-echo "3- Mise à jour vers codification METI" >> $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_03 >> $FILE_LOG
+cd ../../SH
+echo "- Alimentation des tables temporaires avec les donnees du dump : `date`"
+echo "-- Fournisseurs : `date`"
+sh load_four.sh
 
-echo "4- Identification des produits connus en Centrale"
-echo "4- Identification des produits connus en Centrale" >> $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_04 >> $FILE_LOG
+echo "-- Produits : `date`"
+sh load_produit.sh
 
-echo "5- Identification des produits inconnus en Centrale"
-echo "5- Identification des produits inconnus en Centrale" >> $FILE_LOG
-sqlplus -S -L MBCEN/$PWD_USER@$ORACLE_SERVICE @$SCRIPT_RDD_05 >> $FILE_LOG
+echo "-- Libelles produits : `date`"
+sh load_lib_produit.sh
 
-echo "Fin RDD Produit : `date`" >> $FILE_LOG
+echo "-- Code a barres : `date`"
+sh load_code_barre.sh
+
+echo "-- Affectations produits fournisseur : `date`"
+sh load_produit_four.sh
+
+cd ../SQL/INIT/
+echo "- Creation des tables temporaires des historiques : `date`"
+sqlplus -S -L MB002/$PWD_USER@$ORACLE_SERVICE @init_histo.sql
+
+cd ../../SH
+echo "- Alimentation des tables temporaires avec les donnees du dump : `date`"
+echo "-- Achats : `date`"
+sh load_achat.sh
+
+echo "- Ventes : `date`"
+sh load_vente.sh
+
+echo "- Stocks : `date`"
+sh load_stock.sh
+
+echo "- En-tetes commandes : `date`"
+sh load_e_cde.sh
+
+echo "- Details commandes : `date`"
+sh load_d_cde.sh
+
+echo "==================================================="
+echo "Fin Initialisation des tables temporaires : `date` "
+echo "===================================================" >> $FILE_LOG
 
 exit 0

@@ -1,4 +1,5 @@
 set serveroutput on
+set feedback off;
 DECLARE
 ray NUMBER(5);
 fam NUMBER(5);

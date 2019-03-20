@@ -7,6 +7,7 @@ ON RESUME...
 - #5 INCONNU LOCAL : connu_mbcen=0 et new_anpf=[780001 - 790000] -> ON CREE L ARTICLE AVEC UN NOUVEL ANPF SUR PLAGE NOART DISPONIBLE
 */
 set serveroutput on
+set feedback off;
 DECLARE
     v_nb_update NUMBER(10) := 0;
 

@@ -1,7 +1,9 @@
-set serveroutput on size 1000000
+set serveroutput off
+set feedback off;
 /* FOURNISSEUR */
 drop table TMP_IMP_FOURNISSEUR;
-/
+commit;
+
 create table TMP_IMP_FOURNISSEUR
 (
     noligne   	number,
@@ -38,12 +40,13 @@ create table TMP_IMP_FOURNISSEUR
     code_magasin varchar2(4),
     taux_escompte varchar2(14),
     compte_client varchar2(20),
-    commentaire varchar2(255)
+    commentaire varchar2(255),
+    connu_mbcen varchar2(1)
 );
-/
 /* PRODUIT */
 drop table TMP_IMP_PRODUIT;
-/
+commit;
+
 CREATE TABLE TMP_IMP_PRODUIT 
 (	
     NOLIGNE NUMBER , 
@@ -114,12 +117,16 @@ CREATE TABLE TMP_IMP_PRODUIT
     meti_cpx_posit  varchar2(2),
     meti_cpx_confort  varchar2(2),
     meti_typart varchar2(2),
-    COMMENTAIRE VARCHAR2(1000)
+    COMMENTAIRE VARCHAR2(1000),
+    connu_mbcen VARCHAR2(1),
+    ajout_ean_centrale VARCHAR2(1),
+    new_anpf VARCHAR2(18),
+    anpf_deja_utilise varchar2(1)
 );
-/
 /* CODE A BARRES */
 drop table TMP_CODE_BARRE;
-/
+commit;
+
 create table TMP_CODE_BARRE
 (
     noligne   	number,
@@ -131,10 +138,10 @@ create table TMP_CODE_BARRE
     code_exploit_dex varchar2(100),
     commentaire varchar2(255)
 );
-/
 /* AFFECTATION PRODUIT FOURNISSEUR */
 drop table TMP_PRODUIT_FOURNISSEUR;
-/
+commit;
+
 create table TMP_PRODUIT_FOURNISSEUR
 (
     noligne   	number,
@@ -156,10 +163,10 @@ create table TMP_PRODUIT_FOURNISSEUR
     pan_ht number(9,3),
     commentaire varchar2(255)
 );
-/
 /* LIBELLE PRODUIT */
 drop table TMP_LIB_PRODUIT;
-/
+commit;
+
 create table TMP_LIB_PRODUIT
 (
     noligne   	number,
@@ -173,5 +180,123 @@ create table TMP_LIB_PRODUIT
     code_exploit_dex varchar2(100),
     commentaire varchar2(255)
 );
+
+drop table LUCON_FOUR_N3;
+commit;
+
+create table LUCON_FOUR_N3(
+    code VARCHAR2(10),
+    nouveau_code VARCHAR2(10)
+);
+
+drop table LUCON_CAS_N1;
+commit;
+create table LUCON_CAS_N1(
+    code_mbcen VARCHAR2(18)
+);
+
+drop table LUCON_CAS_N3;
+commit;
+create table LUCON_CAS_N3(
+    code_mbcen VARCHAR2(18),
+    code_lucon VARCHAR2(18)
+);
+
+drop table TMP_RAR;
+commit;
+
+create table TMP_RAR (
+    noligne   			number,
+    code_article 		number(8),
+    ean_ppal 			number(14),
+    lbarti 				varchar2(30),
+    lbcompl				varchar2(30),
+    lbmarque			varchar2(10),
+    lbcaisse			varchar2(30),
+    rayon 				number(5),
+    famille				number(5),
+    sousfam				number(5),
+    unite_besoin		number(5),
+    code_tva			number(2),
+    type_etiq			varchar2(1),
+    nb_etiq				number(4),
+    tyuvec				varchar2(1),
+    tyunmesu 			varchar2(1),
+    msconte				number(9,4),
+    pdunit 				number(6,3),
+    arv_dtdeb			varchar2(8),
+    cdfo				number(8),
+    novar				number(3),
+    tyuncde				varchar2(1),
+    tyunfac				varchar2(1),
+    rffou2				varchar2(20),
+    pcb					number(4),
+    qtmincde			number(4),
+    pdul				number(8,3),
+    volume_ul			number(7,6),
+    devise_tar			varchar2(3),
+    date_tar			varchar2(8),
+    px_tar				number(17,4),
+    date_pvm			number(8),
+    px_pvm  			number(17,4),
+    nb_ean_sec			number(2),
+    ean_sec_1 			number(14),
+    ean_sec_2 			number(14),
+    ean_sec_3 			number(14),
+    ean_sec_4 			number(14),
+    ean_sec_5 			number(14),
+    ean_sec_6 			number(14),
+    ean_sec_7 			number(14),
+    ean_sec_8 			number(14),
+    ean_sec_9 			number(14),
+    ean_sec_10			number(14),
+    cd_reseau			varchar2(3),
+    cd_assortiment		varchar2(2),
+    cd_ul				number(3),
+    lb_ul				varchar2(30),
+    arv_ppal			varchar2(1),
+    montant_d3e			number(6,4),
+    arv_dtfin			varchar2(8),
+    cdnomencdoua		varchar2(8),
+    typart				varchar2(2),
+    are_pdntegout 		number(7,4),
+    cdtax_rpd			varchar2(4),
+    mttax_rpd			number(17,6),
+    cdtax_ecomob		varchar2(4),
+    mttax_ecomob        number(17,6),
+    cdtypregr			varchar2(3),
+    noartreg            number(8),
+    qtuvcreg			number(5),
+    carac01				varchar2(100),
+    carac02				varchar2(100),
+    carac03				varchar2(100),
+    carac04				varchar2(100),
+    carac05				varchar2(100),
+    carac06				varchar2(100),
+    carac07				varchar2(100),
+    carac08				varchar2(100),
+    carac09				varchar2(100),
+    carac10				varchar2(100),
+    arc_pdunbrut		number(7,3),
+    htarti				number(4,3),
+    lnarti				number(4,3),
+    lrarti				number(4,3),
+    commentaire varchar2(255)
+);
+commit;
+
+CREATE INDEX index_code_article ON tmp_rar (code_article);
+CREATE INDEX index_ean_ppal ON tmp_rar (ean_ppal);
+CREATE INDEX index_code_anpf_code_barre ON tmp_code_barre (code_anpf,code_barre);
+CREATE INDEX index_code_anpf ON tmp_code_barre (code_anpf);
+CREATE INDEX index_code_anpf_pdt ON tmp_imp_produit (code_anpf);
+CREATE INDEX index_code_anpf_lib ON tmp_lib_produit (code_anpf); 
+
+DROP SEQUENCE noligne_sequence;
+/* Création de la séquence pour numéro de ligne dans le flux RAR */
+create sequence noligne_sequence start with 1
+increment by 1
+minvalue 1
+maxvalue 10000000
 /
 quit

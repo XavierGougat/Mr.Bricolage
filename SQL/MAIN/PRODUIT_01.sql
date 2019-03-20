@@ -1,9 +1,15 @@
 set serveroutput on
+set feedback off;
 DECLARE
 BEGIN
 /* 1) CONTROLE INTEGRITE DES DONNEES */
 UPDATE TMP_IMP_PRODUIT set commentaire = null;
 commit;
+
+dbms_output.put_line('Etape 1 : Contrôle des doublons de la table MGCGS');
+select cgs_cdfamma7, cgs_cdsfama7, cgs_cdubsma7, count(*) as total from mgcgs
+group by cgs_cdfamma7, cgs_cdsfama7, cgs_cdubsma7
+having count(*) > 1;
 
 -- articles en double
 UPDATE TMP_IMP_PRODUIT 

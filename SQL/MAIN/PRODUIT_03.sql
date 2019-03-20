@@ -1,23 +1,21 @@
 set serveroutput on
+set feedback off;
 DECLARE
 BEGIN
     /* ICI ON AFFECTE LES CARACTERISTIQUES ARTICLES LIES A DE LA CODIFICATION SIGMA/METI */
 
     /* 1) AFFECTATION DU CODE TVA*/
-    dbms_output.put_line('Etape 1 : Mise a jour du code TVA');   
+    dbms_output.put_line('Etape 1 : Mise a jour du code TVA');
 
-    select 
-
-    update TMP_IMP_PRODUIT set meti_cdtva = 1 where code_tva is null; 
-    update TMP_IMP_PRODUIT set meti_cdtva = 6 where code_tva = 'C';
     update TMP_IMP_PRODUIT   
     set meti_cdtva =
     CASE
         WHEN code_tva is null THEN 1
-        WHEN code_tva = 0 THEN 9
-        WHEN code_tva = 1 THEN 1
-        WHEN code_tva = 2 THEN 2
-        WHEN code_tva = 4 THEN 4
+        WHEN code_tva = '0' THEN 9
+        WHEN code_tva = '1' THEN 1
+        WHEN code_tva = '2' THEN 2
+        WHEN code_tva = '4' THEN 4
+        WHEN code_tva = 'C' THEN 6
     END;	
     commit;
 

@@ -1,4 +1,5 @@
 set serveroutput on
+set feedback off;
 DECLARE
     anpf_insere NUMBER(7) := 7800001;
     v_nb_update NUMBER(6) := 0;

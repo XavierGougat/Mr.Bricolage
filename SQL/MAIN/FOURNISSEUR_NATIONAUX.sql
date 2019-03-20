@@ -1,71 +1,6 @@
-set serveroutput on size 1000000
-/*
-SYNTHESE REPRISE DES FOURNISSEURS...
-- 1/ NUMFOU < 90 000 => Fournisseur national => si connu rien à faire. 
-- 2/ NUMFOU < 90 000 => Fournisseur national => si inconnu, on insert.
-- 3/ NUMFOU >= 90 000 => Fournisseur local => création pure avec renumérotation (envoyer liste au client pour rapprochement avec Fournisseur existant)
-*/
-/* *** ************************ *** */
-/* Procédure de conversion des adresses au format METI */
-/* *** ************************ *** */
-CREATE OR REPLACE PROCEDURE conv_adresse(
-	adresse1 IN VARCHAR2,
-	adresse2 IN VARCHAR2,
-	adresse3 IN VARCHAR2,
-	lvoi     OUT VARCHAR2,
-	cvoi     OUT VARCHAR2
-) 
-IS
-	fullstr      VARCHAR2(100);
-	v     		 VARCHAR2(1);
-	len          NUMBER(3);
-	longueur_max NUMBER(3) := 30;
-BEGIN
-	IF TRIM(adresse3) IS NULL THEN
-		IF TRIM(adresse1) IS NULL THEN
-			lvoi := TRIM(adresse2);
-			cvoi := '';
-		ELSE
-			lvoi := TRIM(adresse1);
-			cvoi := TRIM(adresse2);
-		END IF;
-	ELSE
-		IF length(TRIM(adresse1) || ' ' || TRIM(adresse2)) <= longueur_max THEN
-			lvoi := trim(TRIM(adresse1) || ' ' || TRIM(adresse2));
-			cvoi := TRIM(adresse3);
-		ELSIF length(TRIM(adresse2) || ' ' || TRIM(adresse3)) <= longueur_max THEN
-			lvoi := TRIM(adresse1);
-			cvoi := TRIM(adresse2) || ' ' || TRIM(adresse3);
-		ELSE
-			v       := 'Z';
-			len     := longueur_max + 1;
-			fullstr := TRIM(adresse1) || ' ' || TRIM(adresse2) || ' ' || TRIM(adresse3);
-			WHILE v != ' ' AND len > 0
-			LOOP
-				v   := substr(fullstr, len, 1);
-				len := len - 1;
-			END LOOP;
-			IF length(fullstr) - len <= 30 THEN
-				lvoi := substr(fullstr, 1, len);
-				cvoi := substr(fullstr, len + 1);
-			ELSE
-				lvoi := substr(fullstr, 1, longueur_max);
-				cvoi := substr(fullstr, longueur_max + 1, longueur_max);
-			END IF;
-		END IF;
-	END IF;
-END conv_adresse;
-/* *** *************************************************************************************** *** */
-
-/* *** *************************************************************************************** *** */
-/* *** ************************ *** */
-/* ON TRAITE DE MANIERE AUTOMATIQUE LES FOURNISSEURS NATIONAUX */
-/* *** ************************ *** */
 declare
 	v NUMBER(5);
 	tot NUMBER(5);
-	lvoi VARCHAR2(60);
-	cvoi VARCHAR2(60);
 	v_d number(5) :=0 ; 
 	
 	v_grv number(2):=null;
@@ -77,6 +12,9 @@ declare
 	v_ERREUR  VARCHAR2(200);
 begin
 	/* Nous complètons les informations du fournisseur template avec les nouveaux GRV 2 et 3*/
+	delete from tmp_imp_fournisseur where code is null;
+	delete from tmp_imp_fournisseur where code like '%,%';
+	commit;
 	Insert into MGGRV (GRV_CDFO,GRV_CDGRVA,GRV_CDUNIBAR,GRV_LBGRVA,GRV_TYPORT,GRV_UNPORT,GRV_NBMINFRA,GRV_TYBASTRS,GRV_CDBARMTR,GRV_CDBARMQT,GRV_TYGESRQT,GRV_NBSEMAPR,GRV_DTPREMCD,GRV_NBSEMDEC,GRV_JJCDELUN,GRV_JJCDEMAR,GRV_JJCDEMER,GRV_JJCDEJEU,GRV_JJCDEVEN,GRV_JJCDESAM,GRV_JJCDEDIM,GRV_NBJRCOUV,GRV_DLMOYEN,GRV_DLRISQUE,GRV_NBJRCSMN,GRV_NOALGORI,GRV_DTARRCDE,GRV_DTFIN,GRV_CDACHET,GRV_CDUEXP,GRV_TYEDBC,GRV_TYTRICD,GVR_TYCALTRF,GRV_CDTABLFR,GRV_TYSEMCDE,GRV_CDMODCAD,GRV_HHLIMCDE,GRV_CDACTIV,GRV_FLCDAUTO,GRV_NBJRDCPP,GRV_FLZONELV,GRV_DTPRCHCD,GRV_DTPRCHLV,GRV_HHDEBCDE,GRV_CDADDSIA,GRV_CDSCTEUR,GRV_CDZNELV,GRV_FLRESQUAI,GRV_PTARRPAL,GRV_FLSAIPAC,GRV_PTARPAMS,GRV_FLTARPAL,GRV_HHLIMLIV,GRV_CDQUAILV,GRV_TYCALRMQ,GRV_CDCDECLI,GRV_TYGESAPP,GRV_FLDBRECP,GRV_FLCRETAR,GRV_CDARDQT,GRV_FLMODPCB,GRV_CDFORESD,GRV_TYRGRPLA,GRV_TXSERVICE,GRV_CFAMENDE,GRV_TYTRIMAG,GRV_TYTRICD2,GRV_TYSAISPAC,GRV_TYGSFRCO,GRV_FLCTRLPX,GRV_DLPROMO,GRV_NBJRLIVR,GRV_MDCLCCAP,GRV_MTFRPORT,GRV_FLRELI,GRV_TYRCPPAL,GRV_CDINCTRM,GRV_NBJVARCP,GRV_CDSOC,GRV_CDACTIVT,GRV_TYSTDEPO,GRV_TYRGDEPO,GRV_DTRGDEPO,GRV_FLPROPPX,GRV_FLPXRUNI,GRV_TYCTRRCP,GRV_CDFIAFOU,GRV_CPFIARCP,GRV_MDPREPPF,GRV_FLECLFAM) values ('1000000','2',null,'GRV LUCON                ','F','M',null,'A',null,'0','P',null,null,null,null,null,null,null,null,null,null,'0',null,null,null,'1',null,null,'1   ','DL','2','6','C',null,null,null,null,null,'46','0','46',null,null,null,null,null,null,'54',null,'54',null,'46',null,null,null,null,null,'46','46',null,'54',null,null,null,null,null,'6','T','1','0',null,null,'P',null,null,null,null,null,null,null,null,null,null,'0','0','0',null,null,null,'0');
 	Insert into MGGRV (GRV_CDFO,GRV_CDGRVA,GRV_CDUNIBAR,GRV_LBGRVA,GRV_TYPORT,GRV_UNPORT,GRV_NBMINFRA,GRV_TYBASTRS,GRV_CDBARMTR,GRV_CDBARMQT,GRV_TYGESRQT,GRV_NBSEMAPR,GRV_DTPREMCD,GRV_NBSEMDEC,GRV_JJCDELUN,GRV_JJCDEMAR,GRV_JJCDEMER,GRV_JJCDEJEU,GRV_JJCDEVEN,GRV_JJCDESAM,GRV_JJCDEDIM,GRV_NBJRCOUV,GRV_DLMOYEN,GRV_DLRISQUE,GRV_NBJRCSMN,GRV_NOALGORI,GRV_DTARRCDE,GRV_DTFIN,GRV_CDACHET,GRV_CDUEXP,GRV_TYEDBC,GRV_TYTRICD,GVR_TYCALTRF,GRV_CDTABLFR,GRV_TYSEMCDE,GRV_CDMODCAD,GRV_HHLIMCDE,GRV_CDACTIV,GRV_FLCDAUTO,GRV_NBJRDCPP,GRV_FLZONELV,GRV_DTPRCHCD,GRV_DTPRCHLV,GRV_HHDEBCDE,GRV_CDADDSIA,GRV_CDSCTEUR,GRV_CDZNELV,GRV_FLRESQUAI,GRV_PTARRPAL,GRV_FLSAIPAC,GRV_PTARPAMS,GRV_FLTARPAL,GRV_HHLIMLIV,GRV_CDQUAILV,GRV_TYCALRMQ,GRV_CDCDECLI,GRV_TYGESAPP,GRV_FLDBRECP,GRV_FLCRETAR,GRV_CDARDQT,GRV_FLMODPCB,GRV_CDFORESD,GRV_TYRGRPLA,GRV_TXSERVICE,GRV_CFAMENDE,GRV_TYTRIMAG,GRV_TYTRICD2,GRV_TYSAISPAC,GRV_TYGSFRCO,GRV_FLCTRLPX,GRV_DLPROMO,GRV_NBJRLIVR,GRV_MDCLCCAP,GRV_MTFRPORT,GRV_FLRELI,GRV_TYRCPPAL,GRV_CDINCTRM,GRV_NBJVARCP,GRV_CDSOC,GRV_CDACTIVT,GRV_TYSTDEPO,GRV_TYRGDEPO,GRV_DTRGDEPO,GRV_FLPROPPX,GRV_FLPXRUNI,GRV_TYCTRRCP,GRV_CDFIAFOU,GRV_CPFIARCP,GRV_MDPREPPF,GRV_FLECLFAM) values ('1000000','3',null,'GRV FONTENAY             ','F','M',null,'A',null,'0','P',null,null,null,null,null,null,null,null,null,null,'0',null,null,null,'1',null,null,'1   ','DL','2','6','C',null,null,null,null,null,'46','0','46',null,null,null,null,null,null,'54',null,'54',null,'46',null,null,null,null,null,'46','46',null,'54',null,null,null,null,null,'6','T','1','0',null,null,'P',null,null,null,null,null,null,null,null,null,null,'0','0','0',null,null,null,'0');
 	Insert into MGFOV (FOV_CDFO,FOV_NOVAR,FOV_CDUEXP,FOV_CDACHET,FOV_NOCI,FOV_CDGRVA,FOV_NOCI_MGACDE,FOV_CDDPRIST,FOV_NOCOMPTA,FOV_LBVA,FOV_TYCALTRF,FOV_DTFIN,FOV_NOVAREXT,FOV_FLTARBAR,FOV_MDGSPXCES) values ('1000000','20',null,null,'1','2','1',null,null,'VA LUCON par défaut           ','E',null,null,'46','V');
@@ -135,7 +73,6 @@ begin
 		order by to_number(code)
 	)
 	loop 
-		conv_adresse(curs.adr1, curs.adr2, curs.adr3, lvoi, cvoi);
 		insert into MGFOU (
 			FOU_CDFO,
 			fou_nm,
@@ -159,8 +96,8 @@ begin
 			null,
 			null,
 			null,
-			lvoi,
-			cvoi,
+			null,
+			null,
 			curs.cp,
 			curs.ville,
 			curs.pays,
@@ -203,37 +140,7 @@ begin
 		);
 		dbms_output.put_line('Fin integration MGCIF : '||curs.cdfo); 
 	end loop;
-	/* *** ************************ *** */
-	/* Début intégration des MGGRV */
-	/* *** ************************ *** 
-	for curs in (
-		select to_number(code) as cdfo, nom,
-		'P' as cdtypf,
-		adr1,
-		adr2,
-		adr3,
-		cp,
-		ville,
-		pays,
-		tel,
-		fax,
-		mail
-		from TMP_IMP_FOURNISSEUR
-		where to_number(code) in (select distinct grv_cdfo from mggrv) and to_number(code) < 90000 and code is not null
-		order by to_number(code)
-	)
-	loop
-		dbms_output.put_line('Debut integration MGGRV : '||curs.cdfo);	    
-		Insert into MGGRV (GRV_CDFO,GRV_CDGRVA,GRV_CDUNIBAR,GRV_LBGRVA,GRV_TYPORT,GRV_UNPORT,GRV_NBMINFRA,GRV_TYBASTRS,GRV_CDBARMTR,GRV_CDBARMQT,GRV_TYGESRQT,GRV_NBSEMAPR,GRV_DTPREMCD,GRV_NBSEMDEC,GRV_JJCDELUN,GRV_JJCDEMAR,GRV_JJCDEMER,GRV_JJCDEJEU,GRV_JJCDEVEN,GRV_JJCDESAM,GRV_JJCDEDIM,GRV_NBJRCOUV,GRV_DLMOYEN,GRV_DLRISQUE,GRV_NBJRCSMN,GRV_NOALGORI,GRV_DTARRCDE,GRV_DTFIN,GRV_CDACHET,GRV_CDUEXP,GRV_TYEDBC,GRV_TYTRICD,GVR_TYCALTRF,GRV_CDTABLFR,GRV_TYSEMCDE,GRV_CDMODCAD,GRV_HHLIMCDE,GRV_CDACTIV,GRV_FLCDAUTO,GRV_NBJRDCPP,GRV_FLZONELV,GRV_DTPRCHCD,GRV_DTPRCHLV,GRV_HHDEBCDE,GRV_CDADDSIA,GRV_CDSCTEUR,GRV_CDZNELV,GRV_FLRESQUAI,GRV_PTARRPAL,GRV_FLSAIPAC,GRV_PTARPAMS,GRV_FLTARPAL,GRV_HHLIMLIV,GRV_CDQUAILV,GRV_TYCALRMQ,GRV_CDCDECLI,GRV_TYGESAPP,GRV_FLDBRECP,GRV_FLCRETAR,GRV_CDARDQT,GRV_FLMODPCB,GRV_CDFORESD,GRV_TYRGRPLA,GRV_TXSERVICE,GRV_CFAMENDE,GRV_TYTRIMAG,GRV_TYTRICD2,GRV_TYSAISPAC,GRV_TYGSFRCO,GRV_FLCTRLPX,GRV_DLPROMO,GRV_NBJRLIVR,GRV_MDCLCCAP,GRV_MTFRPORT,GRV_FLRELI,GRV_TYRCPPAL,GRV_CDINCTRM,GRV_NBJVARCP,GRV_CDSOC,GRV_CDACTIVT,GRV_TYSTDEPO,GRV_TYRGDEPO,GRV_DTRGDEPO,GRV_FLPROPPX,GRV_FLPXRUNI,GRV_TYCTRRCP,GRV_CDFIAFOU,GRV_CPFIARCP,GRV_MDPREPPF,GRV_FLECLFAM) values (curs.cdfo,'2',null,'GRV LUCON                ','F','M',null,'A',null,'0','P',null,null,null,null,null,null,null,null,null,null,'0',null,null,null,'1',null,null,'1   ','DL','2','6','C',null,null,null,null,null,'46','0','46',null,null,null,null,null,null,'54',null,'54',null,'46',null,null,null,null,null,'46','46',null,'54',null,null,null,null,null,'6','T','1','0',null,null,'P',null,null,null,null,null,null,null,'0',null,null,'0','0','0',null,null,null,'0');
-		Insert into MGGRV (GRV_CDFO,GRV_CDGRVA,GRV_CDUNIBAR,GRV_LBGRVA,GRV_TYPORT,GRV_UNPORT,GRV_NBMINFRA,GRV_TYBASTRS,GRV_CDBARMTR,GRV_CDBARMQT,GRV_TYGESRQT,GRV_NBSEMAPR,GRV_DTPREMCD,GRV_NBSEMDEC,GRV_JJCDELUN,GRV_JJCDEMAR,GRV_JJCDEMER,GRV_JJCDEJEU,GRV_JJCDEVEN,GRV_JJCDESAM,GRV_JJCDEDIM,GRV_NBJRCOUV,GRV_DLMOYEN,GRV_DLRISQUE,GRV_NBJRCSMN,GRV_NOALGORI,GRV_DTARRCDE,GRV_DTFIN,GRV_CDACHET,GRV_CDUEXP,GRV_TYEDBC,GRV_TYTRICD,GVR_TYCALTRF,GRV_CDTABLFR,GRV_TYSEMCDE,GRV_CDMODCAD,GRV_HHLIMCDE,GRV_CDACTIV,GRV_FLCDAUTO,GRV_NBJRDCPP,GRV_FLZONELV,GRV_DTPRCHCD,GRV_DTPRCHLV,GRV_HHDEBCDE,GRV_CDADDSIA,GRV_CDSCTEUR,GRV_CDZNELV,GRV_FLRESQUAI,GRV_PTARRPAL,GRV_FLSAIPAC,GRV_PTARPAMS,GRV_FLTARPAL,GRV_HHLIMLIV,GRV_CDQUAILV,GRV_TYCALRMQ,GRV_CDCDECLI,GRV_TYGESAPP,GRV_FLDBRECP,GRV_FLCRETAR,GRV_CDARDQT,GRV_FLMODPCB,GRV_CDFORESD,GRV_TYRGRPLA,GRV_TXSERVICE,GRV_CFAMENDE,GRV_TYTRIMAG,GRV_TYTRICD2,GRV_TYSAISPAC,GRV_TYGSFRCO,GRV_FLCTRLPX,GRV_DLPROMO,GRV_NBJRLIVR,GRV_MDCLCCAP,GRV_MTFRPORT,GRV_FLRELI,GRV_TYRCPPAL,GRV_CDINCTRM,GRV_NBJVARCP,GRV_CDSOC,GRV_CDACTIVT,GRV_TYSTDEPO,GRV_TYRGDEPO,GRV_DTRGDEPO,GRV_FLPROPPX,GRV_FLPXRUNI,GRV_TYCTRRCP,GRV_CDFIAFOU,GRV_CPFIARCP,GRV_MDPREPPF,GRV_FLECLFAM) values (curs.cdfo,'3',null,'GRV FONTENAY             ','F','M',null,'A',null,'0','P',null,null,null,null,null,null,null,null,null,null,'0',null,null,null,'1',null,null,'1   ','DL','2','6','C',null,null,null,null,null,'46','0','46',null,null,null,null,null,null,'54',null,'54',null,'46',null,null,null,null,null,'46','46',null,'54',null,null,null,null,null,'6','T','1','0',null,null,'P',null,null,null,null,null,null,null,'0',null,null,'0','0','0',null,null,null,'0');
-		commit;
-    Insert into MGFOV (FOV_CDFO,FOV_NOVAR,FOV_CDUEXP,FOV_CDACHET,FOV_NOCI,FOV_CDGRVA,FOV_NOCI_MGACDE,FOV_CDDPRIST,FOV_NOCOMPTA,FOV_LBVA,FOV_TYCALTRF,FOV_DTFIN,FOV_NOVAREXT,FOV_FLTARBAR,FOV_MDGSPXCES) values (curs.cdfo,'20',null,null,'1','2','1',null,null,'VA LUCON par défaut           ','E',null,null,'46','V');
-		Insert into MGFOV (FOV_CDFO,FOV_NOVAR,FOV_CDUEXP,FOV_CDACHET,FOV_NOCI,FOV_CDGRVA,FOV_NOCI_MGACDE,FOV_CDDPRIST,FOV_NOCOMPTA,FOV_LBVA,FOV_TYCALTRF,FOV_DTFIN,FOV_NOVAREXT,FOV_FLTARBAR,FOV_MDGSPXCES) values (curs.cdfo,'30',null,null,'1','3','1',null,null,'VA FONTENAY par défaut        ','E',null,null,'46','V');
-		commit;
-    dbms_output.put_line('Fin integration MGGRV : '||curs.cdfo); 
-	end loop;
-	commit;
-*/
+
 	for curs in (
 		select to_number(code) as cdfo, nom,
 		'P' as cdtypf,

@@ -297,6 +297,10 @@ DROP SEQUENCE noligne_sequence;
 create sequence noligne_sequence start with 1
 increment by 1
 minvalue 1
-maxvalue 10000000
+maxvalue 10000000;
+
+Insert into MGCAR (CAR_CDCARACT,CAR_LBCARACT,CAR_CDUNITE,CAR_LBREDCAR,CAR_FLACTIF,CAR_TYVAL,CAR_LONGVAL,CAR_NBDEC,CAR_VALMIN,CAR_VALMAX,CAR_VALDEFAU,CAR_CDGRPCAR,CAR_NOORDGRP) values ('ANPF','Reprise de données            ',null,'ANPF','0','1','7','2',null,null,null,'PV','2');
+Insert into MGCAR (CAR_CDCARACT,CAR_LBCARACT,CAR_CDUNITE,CAR_LBREDCAR,CAR_FLACTIF,CAR_TYVAL,CAR_LONGVAL,CAR_NBDEC,CAR_VALMIN,CAR_VALMAX,CAR_VALDEFAU,CAR_CDGRPCAR,CAR_NOORDGRP) values ('RDD_CAS','Reprise de données            ',null,'RDD_CAS','0','1','1','2',null,null,null,'PV','1');
+commit;
 /
 quit

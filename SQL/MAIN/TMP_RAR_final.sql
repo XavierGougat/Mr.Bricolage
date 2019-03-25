@@ -66,7 +66,7 @@ BEGIN
 		EXIT WHEN c_four%NOTFOUND;              
 			UPDATE TMP_RAR SET 
 			cdfo=CASE WHEN to_number(i_four.code_fournisseur)<90000 THEN to_number(i_four.code_fournisseur) ELSE to_number(i_four.code_fournisseur)+920000 END, 
-			novar=2, 
+			novar=20, 
 			pcb=to_number(i_four.colisage), 
 			rffou2=i_four.ref_fournisseur, 
 			arv_ppal=CASE WHEN trim(i_four.fourn_principal) = '1' THEN 'O' ELSE 'N' END, 

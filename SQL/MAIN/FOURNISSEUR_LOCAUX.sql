@@ -6,28 +6,28 @@ DECLARE
 	
 	CURSOR c_four IS
 		SELECT * FROM  tmp_imp_fournisseur
-		where code > 90000;
+		where code >= 90000;
 		i_four tmp_imp_fournisseur%ROWTYPE;
 
 	CURSOR c_four_FOU IS
 		SELECT t.* FROM  TMP_IMP_FOURNISSEUR t
-		where code is not null and code > 90000;
+		where code is not null and code >= 90000;
 		i_four_FOU TMP_IMP_FOURNISSEUR%ROWTYPE; 
 
 	CURSOR c_four_CIF IS
 		SELECT * FROM MGFOU
-		where fou_cdfo > 1010000;
+		where fou_cdfo >= 1010000;
 		i_four_CIF MGFOU%ROWTYPE;
 
 	CURSOR c_four_GRV IS
 		SELECT * FROM MGFOU
-		where fou_cdfo > 1010000;
+		where fou_cdfo >= 1010000;
 		i_four_GRV MGFOU%ROWTYPE;
 
 	CURSOR c_four_GRV_2 IS
 		SELECT t.* FROM TMP_IMP_FOURNISSEUR t
 		inner join MGGRV on to_number(code)+920000 = grv_cdfo
-		where grv_cdfo > 1010000;
+		where grv_cdfo >= 1010000;
 		i_four_GRV_2 TMP_IMP_FOURNISSEUR%ROWTYPE;
 BEGIN
 	OPEN c_four;

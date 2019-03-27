@@ -4,7 +4,7 @@
 
 mkdir -p -m777 /tmp/reports
 DATE_JOUR=`date`
-SCRIPT=controle_sigma.sql
+SCRIPT=SQL/CONTROLS/controle_sigma_ref.sql
 MAIL_BODY=/tmp/reports/RDD_Controle_SIGMA.html
 DESTINATAIRE=xgougat@meti.fr
 

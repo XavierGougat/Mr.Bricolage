@@ -4,7 +4,7 @@
 
 mkdir -p -m777 /tmp/reports
 DATE_JOUR=`date`
-SCRIPT=controle_sigma_histo.sql
+SCRIPT=SQL/CONTROLS/controle_sigma_histo.sql
 MAIL_BODY=/tmp/reports/RDD_Controle_SIGMA_Histo.html
 DESTINATAIRE=xgougat@meti.fr
 
@@ -43,7 +43,7 @@ echo "
             <div class='alert alert-info'>
                 <strong>Info!</strong> Indicateurs des volumes après intégration brute des données en provenance de SIGMA.
             </div>" >> $MAIL_BODY
-sqlplus -S -L MB001/$PWD_USER@$ORACLE_SERVICE @$SCRIPT >> $MAIL_BODY
+sqlplus -S -L MB002/$PWD_USER@$ORACLE_SERVICE @$SCRIPT >> $MAIL_BODY
 echo '</div>
 </div>
 </div>

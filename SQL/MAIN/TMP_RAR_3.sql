@@ -24,12 +24,15 @@ BEGIN
         noligne,
         code_article,
         carac04,
+        carac05,
         cd_reseau,
-        cd_assortiment)
+        cd_assortiment
+        )
     select
         noligne_sequence.nextval,
         code_mbcen, -- article
         'RDD_CAS|3',
+        code_lucon
         'LU',
         'A'
     FROM LUCON_CAS_N3;

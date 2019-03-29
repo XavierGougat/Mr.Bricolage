@@ -35,13 +35,14 @@ DECLARE
         select * from TMP_RAR
         where carac04='RDD_CAS|5' and ean_ppal is null and ean_sec_1 is not null;
 BEGIN
+    /* *** */
     /* Alimentation de la table TMP_RAR sur la centrale MBCEN */
     /* Cas n°5 : INCONNU LOCAL : connu_mbcen=0 et new_anpf=[780001 - 790000] -> ON CREE L ARTICLE AVEC UN NOUVEL ANPF SUR PLAGE NOART DISPONIBLE */
     /* on modifie l'ANPF a l'insertion dans TMP_RAR et on stocke l ancien dans la carac05 */
     /* **** ************************** ***** */
     dbms_output.put_line('Debut Alimentation des articles cas n°5 dans TMP_RAR');
     /* **** ************************** ***** */
-    insert into TMP_RAR (
+    insert into TMP_RAR(
         noligne,
         code_article,
         lbmarque,

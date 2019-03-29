@@ -9,68 +9,70 @@ L'arborescence présentée ci-dessus doit être conservée et déposée sur le s
 
 ## Les étapes de la reprise
 
-### Le Référentiel
+### Tables temporaires
 #### 📍Alimentation des tables temporaires avec les données SIGMA
 Les tables temporaires sont alimentées via les shells _load_ et les fichiers _CTL_. Les données transmises par SIGMA sont stockés sous forme de fichiers .txt dans le dossier DATA.
-Pour alimenter les tables temporaires, il faut exécuter les loaders concernés: 
-- `sh load_produit.sh` ⏱1min
-- `sh load_lib_produit.sh` ⏱1min
-- `sh load_fournisseur.sh` ⏱1min
-- `sh load_affect_produit_fournisseur.sh` ⏱1min
+Pour alimenter les tables temporaires, il faut exécuter uniquement l'étape 1 du script de RDD : 
+- `sh START.sh 1 1` ⏱4min
 
-...ou bien exécuter la totalité des loaders:
-- `sh load_ref_all.sh` ⏱4min
-
-
+### Le Référentiel
 #### 📍Identification des cas d'utilisation et application des règles de gestion
 Les règles de gestion sont portées dans les scripts _PL/SQL_ à la racine du projet.
-Pour lancer la reprise de données, il faut exécuter le script de lancement :
-- `sh RDD_REF_MBRICO.sh` ⏱60min
+Pour lancer la reprise de données du référentiel, il faut exécuter le script de lancement de l'étape 1 à l'étape 4 :
+- `sh START.sh 2 4` ⏱30min
 
 La reprise peut également être exécutée d'une étape X à une étape Y
-- `sh RDD_REF_MBRICO.sh 1:4` on exécute de l'étape 1 à l'étape 4
-- `sh RDD_REF_MBRICO.sh 2:2` on exécute seulement l'étape 2
+- `sh START.sh 2 3` on exécute de l'étape 2 à l'étape 3
+- `sh START.sh 3 3` on exécute seulement l'étape 3
 
 #### 📍Contrôle des cas d'utilisation identifiés
 Un premier contrôle est exécuté après l'alimentation des tables temporaires et le retravail des données.
 Ce contrôle permet de s'assurer que le volumes de données transmis par SIGMA est le même que celui qui va être intégré dans METI.
+
+Pour lancer le contrôle, exécutez la commande suivant : 
+- `sh START.sh X X` ⏱1 minute
+
 Si les contrôles s'avèrent corrects, et qu'aucun écart n'est déclaré, alors on peut passer à l'étape suivante.
 
 #### 📍Génération du fichier RAR et intégration du fichier en CENTRALE
 On génére un fichier _RAR.csv_ adapté au flux de référentiel Mr.Bricolage _RAR_SPE_BRICO_.
-Pour lancer la génération du fichier _RAR.csv_, suivi de son intégration :
-- `sh spool_rar.sh` ⏱4h
+Pour lancer la génération du fichier _RAR.csv_, suivi de son intégration, il faut exécuter le script de lancement de l'étape 5 à l'étape 6 :
+- `sh START.sh 5 6` ⏱20 minutes
 
 Se référer à la consultation du flux _RAR_SPE_BRICO_ sur eMag afin de s'assurer que tout s'est bien déroulé.
 
+
 #### 📍Contrôle de la volumétrie sur la CENTRALE après intégration du fichier RAR
-Un second contrôle est exécuté après l'alimentation du référentiel CENTRALE via le fichier _RAR.csv_.
+Un second contrôle peut être exécuté après l'alimentation du référentiel CENTRALE via le fichier _RAR.csv_.
 Ce contrôle permet de s'assurer que le volume de données intégré dans le référentiel correspond au volume identifié lors du premier contrôle.
+
+Pour lancer le contrôle, exécutez la commande suivant : 
+- `sh START.sh Y Y` ⏱1 minute
+
 Si le contrôle s'avère correct, et qu'aucun écart n'est déclaré, alors on peut passer à l'étape suivante.
 
+### RER vers site
+#### 📍Export RER Fournisseurs
+Lancer l'export RER Global "Fournisseur" sur le dossier CENTRALE vers le dossier MAGASIN.⏱5min
+
+#### 📍Export RER Articles
+Lancer l'export RER Global "Articles" sur le dossier CENTRALE vers le dossier MAGASIN.⏱10min
+
+#### Import RER en magasin
+Lancer l'import RER sur le dossier MAGASIN pour le fichier RER des FOURNISSEURS.⏱5min
+Lancer l'import RER sur le dossier MAGASIN pour le fichier RER des ARTICLES.⏱45min
+
 ### Les Historiques
-#### 📍Alimentation des tables temporaires avec les données SIGMA
-Les tables temporaires sont alimentées via les shells _load_ et les fichiers _CTL_. Les données transmises par SIGMA sont stockés sous forme de fichiers .txt dans le dossier DATA.
-Pour alimenter les tables temporaires, il faut exécuter les loaders concernés : 
-- `sh load_achat.sh` ⏱1min
-- `sh load_vente.sh` ⏱2min
-- `sh load_stock.sh` ⏱1min
-- `sh load_e_cde.sh` ⏱1min
-- `sh load_d_cde.sh` ⏱1min
-
-...ou bien exécuter la totalité des loaders :
-- `sh load_histo_all.sh` ⏱6min
-
 #### 📍Intégration des historiques dans METI, sur le dossier MAGASIN
 Les règles de gestion sont portées dans les scripts _PL/SQL_ à la racine du projet.
 On intègre les données d'historiques dans le dossier MAGASIN en éxécutant le script d'historique associé.
 
-Pour lancer la reprise des données d'historiques, il faut exécuter le script de lancement :
-- `sh RDD_HISTO_MBRICO.sh` ⏱60min
-
-La reprise peut également être exécutée d'une étape X à une étape Y
-- `sh RDD_HISTO_MBRICO.sh 1:4` on exécute de l'étape 1 à l'étape 4
-- `sh RDD_HISTO_MBRICO.sh 2:2` on exécute seulement l'étape 2
+Pour lancer la reprise des données d'historiques, il faut exécuter le script de lancement de l'étape 7 à l'étape 11 :
+- `sh START.sh 7 10` ⏱60min 
+-- Les stocks ⏱10min 
+-- Les achats ⏱10min
+-- Les commandes ⏱10min
+-- Les ventes ⏱10min 
 
 #### 📍Contrôle de la volumétrie sur le MAGASIN après intégration des historiques
 Un contrôle des HISTORIQUES est exécuté après l'alimentation des données en MAGASIN.

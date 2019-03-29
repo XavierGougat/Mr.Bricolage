@@ -2,13 +2,14 @@
 *	Le client souhaite connaitre le stock repris le jour de la bascule.
 *	Pour cela on va réaliser une régularisation (type comptage) pour TOUS les articles
 *	***	***		***	***		***	***		***	**/
-
 /* 
 On met TMP_IMP_STOCK à jour avec les nouveaux codes articles.
 On fait le lien sur l'ancien code ANPF via la caractéristique ANPF de la table MGCRT 
 */
 DECLARE
-    v_crt       MGCRT%ROWTYPE;   
+    v_crt       MGCRT%ROWTYPE;
+    tyuvec    mgart.art_tyuvec%TYPE;
+    v_cderr VARCHAR2(500);
     CURSOR c_crt IS
         SELECT t2.*
         FROM TMP_IMP_STOCK t1, MGCRT t2
@@ -23,12 +24,7 @@ BEGIN
     END LOOP;
     commit;
     CLOSE c_crt;
-END;
-
-DECLARE
-    tyuvec    mgart.art_tyuvec%TYPE;
-    v_cderr VARCHAR2(500);
-BEGIN	
+	
     /* On flague "stock à zéro" les articles présents dans MGART qui ne sont absents du DUMP stock */
     /* ATTENTION REQUETE RELATIVEMENT LONGUE : 10 minutes */ 
     insert into TMP_IMP_STOCK 
@@ -39,7 +35,7 @@ BEGIN
 	/*	***	***		***	***		***	***		***	***
 	 *	On somme les quantités de stock pour chaque article
 	 *	On insert une régul comptage avec la quantité totale calculée
-     *  Temps de traitement : 20 minutes
+     *  Temps de traitement : 5 minutes
 	 *	***	***		***	***		***	***		***	***/
 	FOR charge IN (
         SELECT nart, quantite
@@ -86,12 +82,11 @@ BEGIN
     /*	***	***		***	***		***	***		***	***
 	 *	On initialise le stock a zero pour les articles sans stock dans le dump
 	 *	On insert une régul comptage avec la quantité a zero
-     *  Temps de traitement : 20 minutes
+     *  Temps de traitement : 5 minutes
 	 *	***	***		***	***		***	***		***	***/
     FOR charge IN (
-        select to_number(code_anpf) as nart from tmp_imp_produit
-        minus
-        select to_number(nart) as nart from tmp_imp_stock;
+        select ast_noart as nart from mgast
+        where ast_qtstock is null
     )
     LOOP
         BEGIN

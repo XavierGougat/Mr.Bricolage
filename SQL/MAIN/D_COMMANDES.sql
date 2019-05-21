@@ -223,12 +223,13 @@ BEGIN
             RFFOU2
           FROM TMP_IMP_LIGNE_CDE
           WHERE NOCDEFOU = C1.NOCDEFOU AND NOART = C1.NOART;
+          commit;
           EXCEPTION
             WHEN dup_val_on_index THEN null;    
         END;
       END IF;
+      i:=i+1;
     END LOOP;
-    COMMIT;
 
 /* ***************************************
 UPDATE POST-DCF
@@ -272,6 +273,11 @@ set CDF_NBLIGCDE = (select count(*) from mgdcf where dcf_nocdefou = cdf_nocdefou
 CDF_MTACHAT  = (select sum(dcf_pxnet) from mgdcf where dcf_nocdefou = cdf_nocdefou),
 CDF_MTTVA    = (select sum(mttva) from TMP_IMP_LIGNE_CDE where nocdefou = cdf_nocdefou),
 CDF_NBCOLIS  = (select case when sum(DCF_QTCDEE) > 0 then sum(DCF_QTCDEE) else null end from mgdcf where DCF_NOCDEFOU = CDF_NOCDEFOU);
+commit;
+
+delete from mgcdf where cdf_nocdefou in (select distinct cdf_nocdefou from mgcdf where
+cdf_nocdefou not in (select distinct dcf_nocdefou from mgdcf));
+commit;
 END;
 /
 quit

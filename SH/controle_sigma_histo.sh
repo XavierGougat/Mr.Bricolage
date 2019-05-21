@@ -1,5 +1,4 @@
 #!/bin/sh
-# Extraction des nouveaux menus
 . /home/metiadm/cron_setenv.sh
 
 mkdir -p -m777 /tmp/reports

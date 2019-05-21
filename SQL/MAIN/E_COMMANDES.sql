@@ -77,7 +77,7 @@ BEGIN
 		vg_cdmag,
 		t1.nocdefou,
 		'E', --type de document = Entree  
-		cif_cdfo END AS cdfo,
+		cif_cdfo AS cdfo,
 		cif_noci AS nocifcde,
 		cif_noci AS nocifreg,
 		mggrv.grv_cdgrva AS cdgrva,

@@ -476,8 +476,8 @@ BEGIN
         OPEN c_crt;
         LOOP
             FETCH c_crt INTO v_crt;
-            
             EXIT WHEN c_crt%NOTFOUND;
+            /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      A COMPLETER      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
         END LOOP;
         commit;
         CLOSE c_crt;

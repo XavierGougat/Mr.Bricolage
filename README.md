@@ -67,8 +67,8 @@ Lancer l'import RER sur le dossier MAGASIN pour le fichier RER des ARTICLES.⏱4
 Les règles de gestion sont portées dans les scripts _PL/SQL_ à la racine du projet.
 On intègre les données d'historiques dans le dossier MAGASIN en éxécutant le script d'historique associé.
 
-Pour lancer la reprise des données d'historiques, il faut exécuter le script de lancement de l'étape 7 à l'étape 11 :
-- `sh START.sh 7 10` ⏱60min 
+Pour lancer la reprise des données d'historiques, il faut exécuter le script de lancement de l'étape 7 à l'étape 12 :
+- `sh START.sh 7 12` ⏱60min 
 -- Les stocks ⏱10min 
 -- Les achats ⏱10min
 -- Les commandes ⏱10min
